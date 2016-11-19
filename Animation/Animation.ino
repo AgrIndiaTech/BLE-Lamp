@@ -60,9 +60,10 @@
 
     #define PIN                     6
     #define NUMPIXELS               24
+    #define BRIGHTNESS              10
 /*=========================================================================*/
 
-Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, 6); // NeoPixel Object for Visor Strips
+Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, 6); // NeoPixel Object for Visor pixels
 
 // Create the bluefruit object, either software serial...uncomment these lines
 /*
@@ -121,6 +122,7 @@ void setup(void)
   delay(500);
 
   // turn off neopixel
+  pixel.setBrightness(BRIGHTNESS);
   pixel.begin(); // This initializes the NeoPixel library.
 
   for(uint8_t i=0; i<NUMPIXELS; i++) {
@@ -225,31 +227,42 @@ void loop(void) {
     }
     
   if (animationState == 1){
-    rainbow(20);
-    pixel.show(); // This sends the updated pixel color to the hardware.
-    
+    //rainbow(20);
+    authenticateTouchPoint();
+    colorWipe(pixel.Color(255, 5, 180), 50); // Pink
+    colorWipe(pixel.Color(255, 0, 0), 50); // Red
+    colorWipe(pixel.Color(255, 150, 0), 50); // Orange
+    colorWipe(pixel.Color(255, 255, 5), 50); // Yellow
+    colorWipe(pixel.Color(0, 255, 0), 50); // Green
+    colorWipe(pixel.Color(0, 0, 255), 50); // Blue
+    colorWipe(pixel.Color(135, 10, 215), 50); // Purple
+    pixel.show(); // This sends the updated pixel color to the hardware. 
   }
   
   if (animationState == 2){
-    colorWipe(pixel.Color(114, 0, 255), 20);
-    colorWipe(pixel.Color(0, 0, 0), 20);
-    colorWipe(pixel.Color(0, 50, 255), 20);
-    colorWipe(pixel.Color(0, 0, 0), 20);
-    colorWipe(pixel.Color(0, 220, 255), 20);
-    colorWipe(pixel.Color(0, 0, 0), 20);
-    colorWipe(pixel.Color(255, 225, 255), 20);
-    colorWipe(pixel.Color(0, 0, 0), 20);
+//    colorWipe(pixel.Color(114, 0, 255), 20);
+//    colorWipe(pixel.Color(0, 0, 0), 20);
+//    colorWipe(pixel.Color(0, 50, 255), 20);
+//    colorWipe(pixel.Color(0, 0, 0), 20);
+//    colorWipe(pixel.Color(0, 220, 255), 20);
+//    colorWipe(pixel.Color(0, 0, 0), 20);
+//    colorWipe(pixel.Color(255, 225, 255), 20);
+//    colorWipe(pixel.Color(0, 0, 0), 20);
+      randomColorFill(25);
+      randomColorFill(15);
     pixel.show(); // This sends the updated pixel color to the hardware.
   }
 
   if (animationState == 3){
-    for(uint16_t i=0; i<pixel.numPixels(); i++) {
-      pixel.setPixelColor(i, pixel.Color(0,0,0));
-    }
-    pixel.setBrightness(255);
-    
-    colorWipe(pixel.Color(0, 0, 255), 20);
-    colorWipe(pixel.Color(0, 0, 0), 20);
+//    for(uint16_t i=0; i<pixel.numPixels(); i++) {
+//      pixel.setPixelColor(i, pixel.Color(0,0,0));
+//    }
+//    //pixel.setBrightness(255);
+//    
+//    colorWipe(pixel.Color(0, 0, 255), 20);
+//    colorWipe(pixel.Color(0, 0, 0), 20);
+    middleFill(pixel.Color(0, 255, 0), 100);
+    sideFill(pixel.Color(255, 0, 0), 100);
     pixel.show(); // This sends the updated pixel color to the hardware.
   }
   
@@ -257,8 +270,9 @@ void loop(void) {
     for(uint16_t i=0; i<pixel.numPixels(); i++) {
       pixel.setPixelColor(i, pixel.Color(0,0,0));
     }
-    pixel.setBrightness(255);
+    //pixel.setBrightness(255);
     rainbowCycle(10);
+    rainbowRing();
     pixel.show(); // This sends the updated pixel color to the hardware.
   }
  }
@@ -279,7 +293,7 @@ void larsonScanner(uint32_t c, uint8_t wait){
    
  for(uint16_t i=0; i<pixel.numPixels()+5; i++) {
   // Draw 5 pixels centered on pos.  setPixelColor() will clip any
-  // pixels off the ends of the strip, we don't need to watch for that.
+  // pixels off the ends of the pixel, we don't need to watch for that.
   pixel.setPixelColor(pos - 2, 0x003b85); // Dark red
   pixel.setPixelColor(pos - 1, 0x005ed2); // Medium red
   pixel.setPixelColor(pos , 0x00c0ff); // Center pixel is brightest
@@ -294,7 +308,7 @@ void larsonScanner(uint32_t c, uint8_t wait){
   // it's easier to erase it all and draw a new one next time.
   for(j=-2; j<= 2; j++) pixel.setPixelColor(pos+j, 0);
  
-  // Bounce off ends of strip
+  // Bounce off ends of pixel
   pos += dir;
   if(pos < 0) {
     pos = 1;
@@ -413,4 +427,265 @@ uint32_t Wheel(byte WheelPos) {
   }
   WheelPos -= 170;
   return pixel.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void whiteCycle() {
+  for(int i=NUMPIXELS-1;i>=0;i--){
+      pixel.setPixelColor((i+8)%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.setPixelColor((i+7)%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.setPixelColor((i+6)%NUMPIXELS, pixel.Color(95, 95, 95)); //change RGB color value here
+      pixel.setPixelColor((i+5)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+4)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+3)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+2)%NUMPIXELS, pixel.Color(95, 95, 95)); //change RGB color value here
+      pixel.setPixelColor((i+1)%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.setPixelColor(i%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.show();
+      if(NUMPIXELS == 16) { delay(185); } //correct timing but speed makes it look spotty instead of a smooth moving ring
+      if(NUMPIXELS  == 24) { delay(115); } //delay(85); } //maybe try for 24 leds. 115 is exact timing, 85 looks nicer.
+      clearRing();
+   }
+}
+
+void clearRing(){
+  for(int i=0;i<NUMPIXELS;i++){
+      pixel.setPixelColor(i, pixel.Color(0, 0, 0)); //change RGB color value here
+   }
+}
+
+void clearpixel(){
+  for(int i=0;i<NUMPIXELS;i++){
+      pixel.setPixelColor(i, pixel.Color(0, 0, 0)); //change RGB color value here
+   }
+   pixel.show();
+}
+
+
+void clearColor(int r, int g, int b, uint8_t wait) {
+  for(int i=NUMPIXELS-1;i>=0;i--){
+      pixel.setPixelColor(i, pixel.Color(r, g, b)); //change RGB color value here
+      pixel.show();
+      delay(wait);
+   }
+}
+
+void authenticateTouchPoint() {
+  Serial.println("Authenticating TOUCHPOINT . . .");
+  if(NUMPIXELS == 16) { whiteSpeed(35, 4); whiteSpeed(28, 4); }
+  if(NUMPIXELS  == 24) { whiteSpeed(15, 4); whiteSpeed(10, 4); }
+  colorWipe(pixel.Color(127, 127, 127), 0);
+  colorWipe(pixel.Color(255, 255, 255), 0);
+  delay(1000);
+  clearColor(0,0,0,35);
+  delay(250);
+  pixel.show();
+}
+
+void authenticateFastPass() {
+  Serial.println("Authenticating FASTPASS . . .");
+  if(NUMPIXELS == 16) { whiteSpeed(28, 1);}
+  if(NUMPIXELS  == 24) { whiteSpeed(15, 1);}
+}
+
+void whiteSpeed(int wait, int cycles){
+  for(int i=(NUMPIXELS*cycles)-1;i>=0;i--){
+      pixel.setPixelColor((i+8)%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.setPixelColor((i+7)%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.setPixelColor((i+6)%NUMPIXELS, pixel.Color(95, 95, 95)); //change RGB color value here
+      pixel.setPixelColor((i+5)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+4)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+3)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+2)%NUMPIXELS, pixel.Color(95, 95, 95)); //change RGB color value here
+      pixel.setPixelColor((i+1)%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.setPixelColor(i%NUMPIXELS, pixel.Color(63, 63, 63)); //change RGB color value here
+      pixel.show();
+      delay(wait);
+      clearRing();
+   }
+}
+
+void transitionToWhiteCycle(int r, int g, int b, uint8_t wait) {
+  for(int i=NUMPIXELS-1;i>8;i--){
+      pixel.setPixelColor(i, pixel.Color(r, g, b)); //change RGB color value here
+      pixel.show();
+      delay(wait);
+   }
+}
+
+void colorPulse(int r, int g, int b, uint8_t wait) {
+  clearRing();
+  pixel.show();
+  delay(wait);
+  for(int i=NUMPIXELS-1;i>=0;i--) {
+    pixel.setPixelColor(i, pixel.Color(r/4, g/4, b/4));
+    pixel.show();
+  }
+  delay(wait);
+  for(int i=NUMPIXELS-1;i>=0;i--) {
+    pixel.setPixelColor(i, pixel.Color(r/3, g/3, b/3));
+    pixel.show();
+  }
+  delay(wait);
+  for(int i=NUMPIXELS-1;i>=0;i--) {
+    pixel.setPixelColor(i, pixel.Color(r/2, g/2, b/2));
+    pixel.show();
+  }
+  delay(wait);
+  for(int i=NUMPIXELS-1;i>=0;i--) {
+    pixel.setPixelColor(i, pixel.Color(r, g, b));
+    pixel.show();
+  }
+  delay(50*14);
+  for(int i=NUMPIXELS-1;i>=0;i--) {
+    pixel.setPixelColor(i, pixel.Color(r/2, g/2, b/2));
+    pixel.show();
+  }
+  delay(wait);
+  for(int i=NUMPIXELS-1;i>=0;i--) {
+    pixel.setPixelColor(i, pixel.Color(r/3, g/3, b/3));
+    pixel.show();
+  }
+  delay(wait);
+  for(int i=NUMPIXELS-1;i>=0;i--) {
+    pixel.setPixelColor(i, pixel.Color(r/4, g/4, b/4));
+    pixel.show();
+  }
+  delay(wait);
+}
+
+void rainbowRing() {
+   int i = 0;
+   while(i<NUMPIXELS*4) {
+      pixel.setPixelColor(i%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+1)%NUMPIXELS, pixel.Color(255, 5, 180)); //change RGB color value here
+      pixel.setPixelColor((i+2)%NUMPIXELS, pixel.Color(255, 0, 0)); //change RGB color value here
+      pixel.setPixelColor((i+3)%NUMPIXELS, pixel.Color(255, 150, 0)); //change RGB color value here
+      pixel.setPixelColor((i+4)%NUMPIXELS, pixel.Color(255, 255, 5)); //change RGB color value here
+      pixel.setPixelColor((i+5)%NUMPIXELS, pixel.Color(0, 255, 0)); //change RGB color value here
+      pixel.setPixelColor((i+6)%NUMPIXELS, pixel.Color(0, 0, 255)); //change RGB color value here
+      pixel.setPixelColor((i+7)%NUMPIXELS, pixel.Color(135, 10, 215)); //change RGB color value here
+      pixel.setPixelColor((i+8)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+9)%NUMPIXELS, pixel.Color(255, 5, 180)); //change RGB color value here
+      pixel.setPixelColor((i+10)%NUMPIXELS, pixel.Color(255, 0, 0)); //change RGB color value here
+      pixel.setPixelColor((i+11)%NUMPIXELS, pixel.Color(255, 150, 0)); //change RGB color value here
+      pixel.setPixelColor((i+12)%NUMPIXELS, pixel.Color(255, 255, 5)); //change RGB color value here
+      pixel.setPixelColor((i+13)%NUMPIXELS, pixel.Color(0, 255, 0)); //change RGB color value here
+      pixel.setPixelColor((i+14)%NUMPIXELS, pixel.Color(0, 0, 255)); //change RGB color value here
+      pixel.setPixelColor((i+15)%NUMPIXELS, pixel.Color(135, 10, 215)); //change RGB color value here
+      pixel.setPixelColor((i+16)%NUMPIXELS, pixel.Color(255, 255, 255)); //change RGB color value here
+      pixel.setPixelColor((i+17)%NUMPIXELS, pixel.Color(255, 5, 180)); //change RGB color value here
+      pixel.setPixelColor((i+18)%NUMPIXELS, pixel.Color(255, 0, 0)); //change RGB color value here
+      pixel.setPixelColor((i+19)%NUMPIXELS, pixel.Color(255, 150, 0)); //change RGB color value here
+      pixel.setPixelColor((i+20)%NUMPIXELS, pixel.Color(255, 255, 5)); //change RGB color value here
+      pixel.setPixelColor((i+21)%NUMPIXELS, pixel.Color(0, 255, 0)); //change RGB color value here
+      pixel.setPixelColor((i+22)%NUMPIXELS, pixel.Color(0, 0, 255)); //change RGB color value here
+      pixel.setPixelColor((i+23)%NUMPIXELS, pixel.Color(135, 10, 215)); //change RGB color value here
+      i++;
+      pixel.show();
+      delay(75);
+   }
+}
+
+void allColors(int i){   
+    if(i<4){
+      colorWipe(pixel.Color(255, 5, 180), 25);  //pink
+      colorWipe(pixel.Color(255, 0, 0), 25);    //red
+      colorWipe(pixel.Color(255, 150, 0), 25);  //orange
+      colorWipe(pixel.Color(255, 255, 5), 25);  //yellow
+      colorWipe(pixel.Color(0, 255, 0), 25);    //green
+      colorWipe(pixel.Color(0, 0, 255), 25);    //blue
+      colorWipe(pixel.Color(135, 10, 215), 25); //purple
+      i++;
+      allColors(i);
+    }
+}
+
+// gradually fill up the pixel with random colors
+void randomColorFill(uint8_t wait) {
+  clearpixel();
+
+  for(uint16_t i=0; i<pixel.numPixels(); i++) { // iterate over every LED of the pixel
+    int r = random(0,255); // generate a random color
+    int g = random(0,255);
+    int b = random(0,255);
+
+    for(uint16_t j=0; j<pixel.numPixels()-i; j++) { // iterate over every LED of the pixel, that hasn't lit up yet
+      pixel.setPixelColor(j-1, pixel.Color(0, 0, 0)); // turn previous LED off
+      pixel.setPixelColor(j, pixel.Color(r, g, b)); // turn current LED on
+      pixel.show(); // apply the colors
+      delay(wait);
+    }
+  }
+}
+
+// pick a random LED to light up until entire pixel is lit
+void randomPositionFill(uint32_t c, uint8_t wait) {
+  clearpixel();
+
+  int used[pixel.numPixels()]; // array to keep track of lit LEDs
+  int lights = 0; // counter
+
+  for(int i = 0; i<pixel.numPixels(); i++){ // fill array with 0
+    used[i] = 0;
+  }
+
+  while(lights<pixel.numPixels()-1) {
+    int j = random(0,pixel.numPixels()-1); // pick a random LED
+    if(used[j] != 1){ // if LED not already lit, proceed
+      pixel.setPixelColor(j, c);
+      used[j] = 1; // update array to remember it is lit
+      lights++;
+      pixel.show(); // display
+      delay(wait);
+    }
+  }
+}
+
+// Light up the pixel starting from the middle
+void middleFill(uint32_t c, uint8_t wait) {
+  clearpixel();
+  delay(wait);
+
+  for(uint16_t i=0; i<(pixel.numPixels()/2); i++) { // start from the middle, lighting an LED on each side
+    pixel.setPixelColor(pixel.numPixels()/2 + i, c);
+    pixel.setPixelColor(pixel.numPixels()/2 - i, c);
+    pixel.show();
+    delay(wait);
+  }
+  pixel.setPixelColor(0, c);
+  pixel.show();
+  delay(wait);
+
+  for(uint16_t i=0; i<(pixel.numPixels()/2); i++) { // reverse
+    pixel.setPixelColor(i, pixel.Color(0, 0, 0));
+    pixel.setPixelColor(pixel.numPixels() - i, pixel.Color(0, 0, 0));
+    pixel.show();
+    delay(wait);
+  }
+  clearpixel();
+}
+
+// Light up the pixel starting from the sides
+void sideFill(uint32_t c, uint8_t wait) {
+  clearpixel();
+  delay(wait);
+
+  for(uint16_t i=0; i<(pixel.numPixels()/2); i++) { // fill pixel from sides to middle
+    pixel.setPixelColor(i, c);
+    pixel.setPixelColor(pixel.numPixels() - i, c);
+    pixel.show();
+    delay(wait);
+  }
+
+  pixel.setPixelColor(pixel.numPixels()/2, c);
+  pixel.show();
+  delay(wait);
+
+  for(uint16_t i=0; i<(pixel.numPixels()/2); i++) { // reverse
+    pixel.setPixelColor(pixel.numPixels()/2 + i, pixel.Color(0, 0, 0));
+    pixel.setPixelColor(pixel.numPixels()/2 - i, pixel.Color(0, 0, 0));
+    pixel.show();
+    delay(wait);
+  }
+  clearpixel();
 }

@@ -1,17 +1,3 @@
-/*********************************************************************
- This is an example for our nRF51822 based Bluefruit LE modules
-
- Pick one up today in the adafruit shop!
-
- Adafruit invests time and resources providing this open source code,
- please support Adafruit and open-source hardware by purchasing
- products from Adafruit!
-
- MIT license, check LICENSE for more information
- All text above, and the splash screen below must be included in
- any redistribution
-*********************************************************************/
-
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
@@ -28,7 +14,6 @@
 #include <Adafruit_NeoPixel.h>
 
 /*=========================================================================
-    APPLICATION SETTINGS
 
     FACTORYRESET_ENABLE       Perform a factory reset when running this sketch
    
@@ -46,21 +31,12 @@
                               the non-volatile memory where config data is
                               stored, setting it back to factory default
                               values.
-       
-                              Some sketches that require you to bond to a
-                              central device (HID mouse, keyboard, etc.)
-                              won't work at all with this feature enabled
-                              since the factory reset will clear all of the
-                              bonding data stored on the chip, meaning the
-                              central device won't be able to reconnect.
-    PIN                       Which pin on the Arduino is connected to the NeoPixels?
-    NUMPIXELS                 How many NeoPixels are attached to the Arduino?
     -----------------------------------------------------------------------*/
     #define FACTORYRESET_ENABLE     1
 
     #define PIN                     6
     #define NUMPIXELS               24
-    #define BRIGHTNESS              10
+    #define BRIGHTNESS              100
 /*=========================================================================*/
 
 Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, 6); // NeoPixel Object for Visor pixels
@@ -227,42 +203,21 @@ void loop(void) {
     }
     
   if (animationState == 1){
-    //rainbow(20);
     authenticateTouchPoint();
-    colorWipe(pixel.Color(255, 5, 180), 50); // Pink
-    colorWipe(pixel.Color(255, 0, 0), 50); // Red
-    colorWipe(pixel.Color(255, 150, 0), 50); // Orange
-    colorWipe(pixel.Color(255, 255, 5), 50); // Yellow
-    colorWipe(pixel.Color(0, 255, 0), 50); // Green
-    colorWipe(pixel.Color(0, 0, 255), 50); // Blue
-    colorWipe(pixel.Color(135, 10, 215), 50); // Purple
+    allColorsWipe(1);
     pixel.show(); // This sends the updated pixel color to the hardware. 
   }
   
   if (animationState == 2){
-//    colorWipe(pixel.Color(114, 0, 255), 20);
-//    colorWipe(pixel.Color(0, 0, 0), 20);
-//    colorWipe(pixel.Color(0, 50, 255), 20);
-//    colorWipe(pixel.Color(0, 0, 0), 20);
-//    colorWipe(pixel.Color(0, 220, 255), 20);
-//    colorWipe(pixel.Color(0, 0, 0), 20);
-//    colorWipe(pixel.Color(255, 225, 255), 20);
-//    colorWipe(pixel.Color(0, 0, 0), 20);
       randomColorFill(25);
       randomColorFill(15);
     pixel.show(); // This sends the updated pixel color to the hardware.
   }
 
   if (animationState == 3){
-//    for(uint16_t i=0; i<pixel.numPixels(); i++) {
-//      pixel.setPixelColor(i, pixel.Color(0,0,0));
-//    }
-//    //pixel.setBrightness(255);
-//    
-//    colorWipe(pixel.Color(0, 0, 255), 20);
-//    colorWipe(pixel.Color(0, 0, 0), 20);
     middleFill(pixel.Color(0, 255, 0), 100);
     sideFill(pixel.Color(255, 0, 0), 100);
+    allColorsPulse(1, 125);
     pixel.show(); // This sends the updated pixel color to the hardware.
   }
   
@@ -270,14 +225,13 @@ void loop(void) {
     for(uint16_t i=0; i<pixel.numPixels(); i++) {
       pixel.setPixelColor(i, pixel.Color(0,0,0));
     }
-    //pixel.setBrightness(255);
+    rainbow(20);
     rainbowCycle(10);
     rainbowRing();
     pixel.show(); // This sends the updated pixel color to the hardware.
   }
  }
 }
-
 
 // Fill the dots one after the other with a color
 void colorWipe(uint32_t c, uint8_t wait) {
@@ -286,71 +240,6 @@ void colorWipe(uint32_t c, uint8_t wait) {
       pixel.show();
       delay(wait);
   }
-}
-
-void larsonScanner(uint32_t c, uint8_t wait){
-   int j;
-   
- for(uint16_t i=0; i<pixel.numPixels()+5; i++) {
-  // Draw 5 pixels centered on pos.  setPixelColor() will clip any
-  // pixels off the ends of the pixel, we don't need to watch for that.
-  pixel.setPixelColor(pos - 2, 0x003b85); // Dark red
-  pixel.setPixelColor(pos - 1, 0x005ed2); // Medium red
-  pixel.setPixelColor(pos , 0x00c0ff); // Center pixel is brightest
-  pixel.setPixelColor(pos + 1, 0x005ed2); // Medium red
-  pixel.setPixelColor(pos + 2, 0x003b85); // Dark red
-  
-  
-  pixel.show();
-  delay(wait);
- 
-  // Rather than being sneaky and erasing just the tail pixel,
-  // it's easier to erase it all and draw a new one next time.
-  for(j=-2; j<= 2; j++) pixel.setPixelColor(pos+j, 0);
- 
-  // Bounce off ends of pixel
-  pos += dir;
-  if(pos < 0) {
-    pos = 1;
-    dir = -dir;
-  } else if(pos >= pixel.numPixels()) {
-    pos = pixel.numPixels() - 2;
-    dir = -dir;
-  } 
- } 
- //colorWipe(pixel.Color(0, 0, 0), 20);
-}
-
-
-
-void flashRandom(int wait, uint8_t howmany) {
- 
-  for(uint16_t i=0; i<howmany; i++) {
-    // get a random pixel from the list
-    int j = random(pixel.numPixels());
-    
-    // now we will 'fade' it in 5 steps
-    for (int x=0; x < 5; x++) {
-      int r = red * (x+1); r /= 5;
-      int g = green * (x+1); g /= 5;
-      int b = blue * (x+1); b /= 5;
-      
-      pixel.setPixelColor(j, pixel.Color(r, g, b));
-      pixel.show();
-      delay(wait);
-    }
-    // & fade out in 5 steps
-    for (int x=5; x >= 0; x--) {
-      int r = red * x; r /= 5;
-      int g = green * x; g /= 5;
-      int b = blue * x; b /= 5;
-      
-      pixel.setPixelColor(j, pixel.Color(r, g, b));
-      pixel.show();
-      delay(wait);
-    }
-  }
-  // LEDs will be off when done (they are faded to 0)
 }
 
 void rainbow(uint8_t wait) {
@@ -470,9 +359,8 @@ void clearColor(int r, int g, int b, uint8_t wait) {
 }
 
 void authenticateTouchPoint() {
-  Serial.println("Authenticating TOUCHPOINT . . .");
-  if(NUMPIXELS == 16) { whiteSpeed(35, 4); whiteSpeed(28, 4); }
-  if(NUMPIXELS  == 24) { whiteSpeed(15, 4); whiteSpeed(10, 4); }
+  whiteSpeed(15, 4);
+  whiteSpeed(10, 4);
   colorWipe(pixel.Color(127, 127, 127), 0);
   colorWipe(pixel.Color(255, 255, 255), 0);
   delay(1000);
@@ -482,9 +370,7 @@ void authenticateTouchPoint() {
 }
 
 void authenticateFastPass() {
-  Serial.println("Authenticating FASTPASS . . .");
-  if(NUMPIXELS == 16) { whiteSpeed(28, 1);}
-  if(NUMPIXELS  == 24) { whiteSpeed(15, 1);}
+  whiteSpeed(15, 1);
 }
 
 void whiteSpeed(int wait, int cycles){
@@ -535,7 +421,7 @@ void colorPulse(int r, int g, int b, uint8_t wait) {
     pixel.setPixelColor(i, pixel.Color(r, g, b));
     pixel.show();
   }
-  delay(50*14);
+  delay(10*wait);
   for(int i=NUMPIXELS-1;i>=0;i--) {
     pixel.setPixelColor(i, pixel.Color(r/2, g/2, b/2));
     pixel.show();
@@ -586,18 +472,33 @@ void rainbowRing() {
    }
 }
 
-void allColors(int i){   
-    if(i<4){
-      colorWipe(pixel.Color(255, 5, 180), 25);  //pink
-      colorWipe(pixel.Color(255, 0, 0), 25);    //red
-      colorWipe(pixel.Color(255, 150, 0), 25);  //orange
-      colorWipe(pixel.Color(255, 255, 5), 25);  //yellow
-      colorWipe(pixel.Color(0, 255, 0), 25);    //green
-      colorWipe(pixel.Color(0, 0, 255), 25);    //blue
-      colorWipe(pixel.Color(135, 10, 215), 25); //purple
-      i++;
-      allColors(i);
-    }
+void allColorsWipe(int i){   
+    //if(i<2){
+      colorWipe(pixel.Color(255, 5, 180), 35);  //pink
+      colorWipe(pixel.Color(255, 0, 0), 35);    //red
+      colorWipe(pixel.Color(255, 150, 0), 35);  //orange
+      colorWipe(pixel.Color(255, 255, 5), 35);  //yellow
+      colorWipe(pixel.Color(0, 255, 0), 35);    //green
+      colorWipe(pixel.Color(0, 0, 255), 35);    //blue
+      colorWipe(pixel.Color(135, 10, 215), 35); //purple
+      //i++;
+      //allColorsWipe(i);
+    //}
+}
+
+void allColorsPulse(int i, int wait){   
+    //if(i<3){
+      colorPulse(255, 255, 255, wait);
+      colorPulse(255, 5, 180, wait);  //pink
+      colorPulse(255, 0, 0, wait);    //red
+      colorPulse(255, 150, 0, wait);  //orange
+      colorPulse(255, 255, 5, wait);  //yellow
+      colorPulse(0, 255, 0, wait);    //green
+      colorPulse(0, 0, 255, wait);    //blue
+      colorPulse(135, 10, 215, wait); //purple
+      //i++;
+      //allColorsPulse(i, wait);
+    //}
 }
 
 // gradually fill up the pixel with random colors

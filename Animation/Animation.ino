@@ -39,27 +39,11 @@
     #define BRIGHTNESS              100
 /*=========================================================================*/
 
-Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, 6); // NeoPixel Object for Visor pixels
+Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, 6); // NeoPixel Object
 
-// Create the bluefruit object, either software serial...uncomment these lines
-/*
-SoftwareSerial bluefruitSS = SoftwareSerial(BLUEFRUIT_SWUART_TXD_PIN, BLUEFRUIT_SWUART_RXD_PIN);
-
-Adafruit_BluefruitLE_UART ble(bluefruitSS, BLUEFRUIT_UART_MODE_PIN,
-                      BLUEFRUIT_UART_CTS_PIN, BLUEFRUIT_UART_RTS_PIN);
-*/
-
-/* ...or hardware serial, which does not need the RTS/CTS pins. Uncomment this line */
-// Adafruit_BluefruitLE_UART ble(BLUEFRUIT_HWSERIAL_NAME, BLUEFRUIT_UART_MODE_PIN);
-
-/* ...hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST */
+// Create the bluefruit object, either software serial
+//Hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST
 Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
-
-/* ...software SPI, using SCK/MOSI/MISO user-defined SPI pins and then user selected CS/IRQ/RST */
-//Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_SCK, BLUEFRUIT_SPI_MISO,
-//                             BLUEFRUIT_SPI_MOSI, BLUEFRUIT_SPI_CS,
-//                             BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
-
 
 // A small helper
 void error(const __FlashStringHelper*err) {
@@ -67,7 +51,7 @@ void error(const __FlashStringHelper*err) {
   while (1);
 }
 
-// function prototypes over in packetparser.cpp
+// function prototypes over in packetParser.cpp
 uint8_t readPacket(Adafruit_BLE *ble, uint16_t timeout);
 float parsefloat(uint8_t *buffer);
 void printHex(const uint8_t * data, const uint32_t numBytes);
@@ -75,22 +59,14 @@ void printHex(const uint8_t * data, const uint32_t numBytes);
 // the packet buffer
 extern uint8_t packetbuffer[];
 
-
-/**************************************************************************/
-/*!
-    @brief  Sets up the HW an the BLE module (this function is called
-            automatically on startup)
-*/
-/**************************************************************************/
 //additional variables
 
 //Color
     uint8_t red = 255;
     uint8_t green = 255;
     uint8_t blue = 255;
-    uint8_t animationState = 1;
-
-    int pos = 0, dir = 1; // Position, direction of "eye" for larson scanner animation
+    //uint8_t animationState = 1;
+    uint8_t animationState = 0;
 
 void setup(void)
 {
@@ -195,41 +171,44 @@ void loop(void) {
     uint8_t buttnum = packetbuffer[2] - '0';
     boolean pressed = packetbuffer[3] - '0';
     Serial.print ("Button "); Serial.print(buttnum);
-    animationState = buttnum;
+    //animationState = buttnum;
     if (pressed) {
       Serial.println(" pressed");
+      animationState = buttnum;
     } else {
       Serial.println(" released");
     }
-    
-  if (animationState == 1){
-    authenticateTouchPoint();
-    allColorsWipe(1);
-    pixel.show(); // This sends the updated pixel color to the hardware. 
-  }
-  
-  if (animationState == 2){
-      randomColorFill(25);
-      randomColorFill(15);
-    pixel.show(); // This sends the updated pixel color to the hardware.
-  }
 
-  if (animationState == 3){
-    middleFill(pixel.Color(0, 255, 0), 100);
-    sideFill(pixel.Color(255, 0, 0), 100);
-    allColorsPulse(1, 125);
-    pixel.show(); // This sends the updated pixel color to the hardware.
+  switch (animationState) {
+            case 1:
+                authenticateTouchPoint();
+                allColorsWipe(1);
+                break;
+            case 2:
+                allColorsPulse(1, 125);            
+                break;
+            case 3:
+                rainbow(20);                              
+                break;
+            case 4:
+                rainbowCycle(10);
+                break;
+            case 5:
+                rainbowRing();                
+                break;
+            case 6:
+                middleFill(pixel.Color(0, 255, 0), 100);
+                sideFill(pixel.Color(255, 0, 0), 100);
+                break;
+            case 7:
+                randomColorFill(20);
+                break;
+            case 8:            
+                RGBLoop();
+                break;
   }
-  
-  if (animationState == 4){
-    for(uint16_t i=0; i<pixel.numPixels(); i++) {
-      pixel.setPixelColor(i, pixel.Color(0,0,0));
-    }
-    rainbow(20);
-    rainbowCycle(10);
-    rainbowRing();
-    pixel.show(); // This sends the updated pixel color to the hardware.
-  }
+  clearpixel();
+  animationState = 0;
  }
 }
 
@@ -264,42 +243,6 @@ void rainbowCycle(uint8_t wait) {
     }
     pixel.show();
     delay(wait);
-  }
-}
-
-//Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) {
-      for (int i=0; i < pixel.numPixels(); i=i+3) {
-        pixel.setPixelColor(i+q, c);    //turn every third pixel on
-      }
-      pixel.show();
-
-      delay(wait);
-
-      for (int i=0; i < pixel.numPixels(); i=i+3) {
-        pixel.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
-  }
-}
-
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (int i=0; i < pixel.numPixels(); i=i+3) {
-        pixel.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
-      }
-      pixel.show();
-
-      delay(wait);
-
-      for (int i=0; i < pixel.numPixels(); i=i+3) {
-        pixel.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
   }
 }
 
@@ -589,4 +532,61 @@ void sideFill(uint32_t c, uint8_t wait) {
     delay(wait);
   }
   clearpixel();
+}
+
+/*Extra stuff*/
+void showStrip() {
+ #ifdef ADAFRUIT_NEOPIXEL_H 
+   // NeoPixel
+   pixel.show();
+ #endif
+ #ifndef ADAFRUIT_NEOPIXEL_H
+   // FastLED
+   FastLED.show();
+ #endif
+}
+
+void setPixel(int Pixel, byte red, byte green, byte blue) {
+ #ifdef ADAFRUIT_NEOPIXEL_H 
+   // NeoPixel
+   pixel.setPixelColor(Pixel, pixel.Color(red, green, blue));
+ #endif
+ #ifndef ADAFRUIT_NEOPIXEL_H 
+   // FastLED
+   leds[Pixel].r = red;
+   leds[Pixel].g = green;
+   leds[Pixel].b = blue;
+ #endif
+}
+
+void setAll(byte red, byte green, byte blue) {
+  for(int i = 0; i < NUMPIXELS; i++ ) {
+    setPixel(i, red, green, blue); 
+  }
+  showStrip();
+}
+
+void RGBLoop(){
+  for(int j = 0; j < 3; j++ ) { 
+    // Fade IN
+    for(int k = 0; k < 256; k++) { 
+      switch(j) { 
+        case 0: setAll(k,0,0); break;
+        case 1: setAll(0,k,0); break;
+        case 2: setAll(0,0,k); break;
+      }
+      showStrip();
+      delay(3);
+    }
+    // Fade OUT
+    for(int k = 255; k >= 0; k--) { 
+      switch(j) { 
+        case 0: setAll(k,0,0); break;
+        case 1: setAll(0,k,0); break;
+        case 2: setAll(0,0,k); break;
+      }
+      showStrip();
+      delay(3);
+    }
+  }
 }

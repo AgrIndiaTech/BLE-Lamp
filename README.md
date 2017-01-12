@@ -3,7 +3,7 @@ Neopixel ring lamp controlled through Bluetooth Low Energy. Utilizes Adafruit Fe
 
 ## YouTube
 
-YouTube: 
+YouTube: https://www.youtube.com/watch?v=09lxoxWJ0iU&feature=youtu.be
 
 ### Diagram
 
